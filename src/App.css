@@ -1,0 +1,15 @@
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #0B1220;
+    overflow-x: hidden;
+    
+}
+
+#root {
+    min-height: 100vh;
+    background: #0B1220;
+}
