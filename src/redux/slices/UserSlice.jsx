@@ -17,11 +17,41 @@ const userSlice = createSlice({
         logout: (state) => {
             state.user = null;
             localStorage.removeItem("user");
-            localStorage.removeItem("cart");
-        }
+        },
 
+        deleteAccount: (state) => {
+
+            const currentUser = state.user;
+
+            if (!currentUser) return;
+
+            const users =
+                JSON.parse(localStorage.getItem("users")) || [];
+
+            const updatedUsers = users.filter(
+                user => user.id !== currentUser.id
+            );
+
+            localStorage.setItem(
+                "users",
+                JSON.stringify(updatedUsers)
+            );
+
+            localStorage.removeItem(
+                `cart_${currentUser.id}`
+            );
+
+            localStorage.removeItem("user");
+
+            state.user = null;
+        }
     }
 });
 
-export const { login, logout } = userSlice.actions;
+export const {
+    login,
+    logout,
+    deleteAccount
+} = userSlice.actions;
+
 export default userSlice.reducer;

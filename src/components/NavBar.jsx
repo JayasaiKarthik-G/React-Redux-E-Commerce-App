@@ -32,8 +32,6 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import axios from "axios";
-import API_URL from "../api";
 import { ListItemIcon } from "@mui/material";
 
 function NavBar() {
@@ -87,8 +85,10 @@ function NavBar() {
         navigate("/login", { replace: true });
     };
 
-    const handleDeleteAccount = async () => {
-        const userData = JSON.parse(localStorage.getItem("user"));
+    const handleDeleteAccount = () => {
+
+        const userData =
+            JSON.parse(localStorage.getItem("user"));
 
         if (!userData) return;
 
@@ -98,22 +98,34 @@ function NavBar() {
 
         if (!confirmDelete) return;
 
-        try {
-            await axios.delete(`${API_URL}/users/${userData.id}`);
+        const users =
+            JSON.parse(localStorage.getItem("users")) || [];
 
-            localStorage.removeItem("user");
-            window.dispatchEvent(new Event("userChanged"));
+        const updatedUsers = users.filter(
+            user => user.id !== userData.id
+        );
 
-            setAnchorEl(null);
-            setDrawerOpen(false);
+        localStorage.setItem(
+            "users",
+            JSON.stringify(updatedUsers)
+        );
 
-            navigate("/reg", { replace: true });
+        localStorage.removeItem(
+            `cart_${userData.id}`
+        );
 
-            alert("Account deleted successfully");
-        } catch (error) {
-            console.log(error);
-            alert("Delete failed");
-        }
+        localStorage.removeItem("user");
+
+        window.dispatchEvent(
+            new Event("userChanged")
+        );
+
+        setAnchorEl(null);
+        setDrawerOpen(false);
+
+        alert("Account deleted successfully");
+
+        navigate("/reg", { replace: true });
     };
 
     return (
