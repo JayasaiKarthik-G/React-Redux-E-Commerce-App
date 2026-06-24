@@ -9,6 +9,7 @@ import {
     Stack
 } from "@mui/material";
 
+import API_URL from "../api";
 
 import InputAdornment from "@mui/material/InputAdornment";
 import PersonIcon from "@mui/icons-material/Person";
@@ -17,6 +18,7 @@ import LoginIcon from "@mui/icons-material/Login";
 
 
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Login() {
     const [emailOrUsername, setEmailOrUsername] = useState("");
@@ -39,45 +41,30 @@ function Login() {
             return;
         }
 
-        const users =
-            JSON.parse(localStorage.getItem("users")) || [];
+        try {
+            const response = await axios.get(`${API_URL}/users`);
 
-        const user = users.find(
-            (u) =>
-                (u.email === emailOrUsername ||
-                    u.username === emailOrUsername) &&
-                u.password === password
-        );
-
-        if (user) {
-
-            localStorage.setItem(
-                "user",
-                JSON.stringify(user)
+            const user = response.data.find(
+                (u) =>
+                    (u.email === emailOrUsername ||
+                        u.username === emailOrUsername) &&
+                    u.password === password
             );
 
-            const userCart =
-                JSON.parse(
-                    localStorage.getItem(`cart_${user.id}`)
-                ) || [];
+            if (user) {
+                localStorage.setItem("user", JSON.stringify(user));
+                
+                window.dispatchEvent(new Event("userChanged"));
 
-            localStorage.setItem(
-                "cart",
-                JSON.stringify(userCart)
-            );
-
-            window.dispatchEvent(
-                new Event("userChanged")
-            );
-
-            alert("Login Successful");
-
-            navigate(
-                `/${user.username}/home`, { replace: true }
-            );
-
-        } else {
-            alert("Invalid Email or Password");
+                alert("Login Successful");
+                navigate(`/${user.username}/home`, { replace: true });
+            
+            } else {
+                alert("Invalid Email or Password");
+            }
+        } catch (error) {
+            console.log(error);
+            alert("Login Failed");
         }
     }
 

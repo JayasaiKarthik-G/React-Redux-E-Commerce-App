@@ -17,6 +17,8 @@ import LockIcon from "@mui/icons-material/Lock";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import API_URL from "../api";
 
 function Register() {
     const [name, setName] = useState("");
@@ -62,47 +64,38 @@ function Register() {
         if (password !== confirmPassword)
             return alert("Passwords do not match");
 
-        const users =
-            JSON.parse(localStorage.getItem("users")) || [];
+        try {
+            const response = await axios.get(`${API_URL}/users`);
 
-        const exists = users.find(
-            (u) =>
-                u.email === email ||
-                u.username === username
-        );
+            const users = response.data;
 
-        if (exists) {
-            alert("Email or Username already registered");
-            return;
+            const exists = users.find(
+                (u) => u.email === email
+            );
+
+            if (exists) return alert("Email already registered");
+
+            const newId =
+                users.length > 0
+                    ? Math.max(...users.map(user => Number(user.id))) + 1
+                    : 1;
+
+            const obj = {
+                id: newId,
+                name,
+                username,
+                email,
+                password
+            };
+
+            await axios.post(`${API_URL}/users`, obj);
+
+            alert("Registration Successful");
+            navigate("/login");
+        } catch (error) {
+            console.log(error);
+            alert("Registration Failed");
         }
-
-        const newId =
-            users.length > 0
-                ? Math.max(
-                    ...users.map(
-                        user => Number(user.id)
-                    )
-                ) + 1
-                : 1;
-
-        const obj = {
-            id: newId,
-            name,
-            username,
-            email,
-            password
-        };
-
-        users.push(obj);
-
-        localStorage.setItem(
-            "users",
-            JSON.stringify(users)
-        );
-
-        alert("Registration Successful");
-
-        navigate("/login");
     }
 
     const inputSx = {
